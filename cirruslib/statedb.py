@@ -340,7 +340,6 @@ class StateDB:
         expr = Key(INDEX_KEYS[index]).eq(collection)
         if state or state and since:
             logger.info("State: %s, Since: %s" % (state, since))
-            import pdb; pdb.set_trace()
             if state and since:
                 # If both state and since are passed
                 start = datetime.now() - self.since_to_timedelta(since)
