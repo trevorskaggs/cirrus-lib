@@ -1,10 +1,13 @@
 import boto3
 import json
 import os
+import operator
+
 
 from boto3utils import s3
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Attr, Key
 from datetime import datetime, timedelta
+from functools import reduce
 from logging import getLogger
 from traceback import format_exc
 from typing import Dict, Optional, List
@@ -333,15 +336,23 @@ class StateDB:
         Returns:
             Dict: DynamoDB response
         """
+        resp = None
         expr = Key(INDEX_KEYS[index]).eq(collection)
-        if state and since:
-            start = datetime.now() - self.since_to_timedelta(since)
-            begin = f"{state}_{start.isoformat()}"
-            end = f"{state}_{datetime.now().isoformat()}"
-            expr = expr & Key('current_state').between(begin, end)
-        elif state:
-            expr = expr & Key('current_state').begins_with(state)
-        resp = self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, **kwargs)
+        if state or state and since:
+            if state and since:
+                # If both state and since are passed
+                start = datetime.now() - self.since_to_timedelta(since)
+                begin = f"{state}_{start.isoformat()}"
+                end = f"{state}_{datetime.now().isoformat()}"
+                expr = expr & Key('current_state').between(begin, end)
+            elif state and not since:
+                # Only state is passed
+                expr = expr & Key('current_state').begins_with(state)
+            resp = self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, **kwargs)
+        elif since and not state:
+            # Only since is passed
+            filter_expr = reduce(operator.or_, (Attr('current_state').bewteen(f"{state}_{begin.isoformat()}", f"{state}_{time_now.isoformat()}") for state in STATES))
+            resp = self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, FilterExpression=filter_expr, **kwargs)
         return resp
 
     @classmethod
