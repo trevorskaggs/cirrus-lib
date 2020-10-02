@@ -339,6 +339,7 @@ class StateDB:
         resp = None
         expr = Key(INDEX_KEYS[index]).eq(collection)
         logger.info("State: %s, Since: %s" % (state, since))
+        import pdb; pdb.set_trace()
         if state or state and since:
             if state and since:
                 # If both state and since are passed
