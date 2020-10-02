@@ -217,7 +217,6 @@ class StateDB:
             'items': []
         }
         logger.info("State: %s, Since: %s" % (state, since))
-        import pdb; pdb.set_trace()
         if nextkey:
             dbitem = self.get_dbitem(nextkey)
             startkey = { key: dbitem[key] for key in ['input_collections', 'id', 'current_state']}
