@@ -392,7 +392,7 @@ class StateDB:
             resp = self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, **kwargs)
         elif since and not state:
             # Only since is passed
-            filter_expr = reduce(operator.or_, (Attr('current_state').bewteen(f"{state}_{begin.isoformat()}", f"{state}_{time_now.isoformat()}") for state in STATES))
+            filter_expr = reduce(operator.or_, (Attr('current_state').between(f"{state}_{begin.isoformat()}", f"{state}_{time_now.isoformat()}") for state in STATES))
             resp = self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, FilterExpression=filter_expr, **kwargs)
         return resp
 
