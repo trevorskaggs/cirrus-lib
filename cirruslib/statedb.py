@@ -338,8 +338,8 @@ class StateDB:
         """
         resp = None
         expr = Key(INDEX_KEYS[index]).eq(collection)
+        logger.info("State: %s, Since: %s" % (state, since))
         if state or state and since:
-            logger.info("State: %s, Since: %s" % (state, since))
             if state and since:
                 # If both state and since are passed
                 start = datetime.now() - self.since_to_timedelta(since)
