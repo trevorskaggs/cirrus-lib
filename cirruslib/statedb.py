@@ -386,7 +386,7 @@ class StateDB:
                 expr = expr & Key('current_state').between(begin, end)
                 return self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, **kwargs)
             else:
-                filter_expr = reduce(operator.or_, (Attr('current_state').between(f"{state}_{begin.isoformat()}", f"{state}_{time_now.isoformat()}") for state in STATES))
+                filter_expr = reduce(operator.or_, (Attr('current_state').between(begin, f"{state}_{time_now.isoformat()}") for state in STATES))
                 return self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, FilterExpression=filter_expr, **kwargs)
         elif state:
             expr = expr & Key('current_state').begins_with(state)
