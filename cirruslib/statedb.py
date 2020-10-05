@@ -378,16 +378,16 @@ class StateDB:
         """
         expr = Key(INDEX_KEYS[index]).eq(collection)
         logger.info("State: %s, Since: %s" % (state, since))
+        timenow = datetime.now()
         if since:
-            start = datetime.now() - self.since_to_timedelta(since)
-            begin = f"{state}_{start.isoformat()}"
+            start = timenow - self.since_to_timedelta(since)
             if state:
                 end = f"{state}_{datetime.now().isoformat()}"
-                expr = expr & Key('current_state').between(begin, end)
+                expr = expr & Key('current_state').between(f"{state}_{start.isoformat()}", end)
                 return self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, **kwargs)
             else:
-                filter_expr = reduce(operator.or_, (Attr('current_state').between(begin, f"{state}_{datetime.now().isoformat()}") for state in STATES))
-                return self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, FilterExpression=filter_expr, **kwargs)
+                expr = expr &  = reduce(operator.or_, (Key('current_state').between(f"{st}_{start.isoformat()}", f"{st}_{timenow.isoformat()}") for st in STATES))
+                return self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, **kwargs)
         elif state:
             expr = expr & Key('current_state').begins_with(state)
             return self.table.query(IndexName=index, KeyConditionExpression=expr, Select=select, **kwargs)
